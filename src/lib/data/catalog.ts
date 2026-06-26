@@ -22,16 +22,25 @@ export const SOLAR_ECLIPSES: SolarEclipseEntry[] = [
     magnitude: 1.0386,
     durationAtGreatest: 138,
     greatest: { time: '2026-08-12T17:47:06Z', lat: 65.9, lon: -9.7, sunAlt: 26 },
-    regions: ['Greenland', 'Iceland', 'Spain', 'Russia'],
+    // Path: Russia (Siberia) → Arctic → Greenland → Iceland (GE) → Atlantic → northern Spain
+    // After Greatest Eclipse the shadow moves SSE, longitude stays near −5 to −10°W.
+    // Source: NASA SE2026Aug12T bulletin; waypoints are approximate (±50 km).
+    regions: ['Russia (Siberia)', 'Greenland', 'Iceland', 'Faroe Islands', 'Spain (Galicia, Asturias, Cantabria)'],
     centralLine: [
-      { time: '2026-08-12T17:06:00Z', lat: 71.5,  lon: -46.0, duration: 80,  pathWidthKm: 290 },
-      { time: '2026-08-12T17:20:00Z', lat: 70.8,  lon: -30.0, duration: 105, pathWidthKm: 310 },
-      { time: '2026-08-12T17:35:00Z', lat: 68.0,  lon: -18.0, duration: 125, pathWidthKm: 320 },
-      { time: '2026-08-12T17:47:06Z', lat: 65.9,  lon: -9.7,  duration: 138, pathWidthKm: 326 },
-      { time: '2026-08-12T18:00:00Z', lat: 62.0,  lon:  -1.0, duration: 118, pathWidthKm: 295 },
-      { time: '2026-08-12T18:10:00Z', lat: 56.5,  lon:   5.5, duration: 95,  pathWidthKm: 258 },
-      { time: '2026-08-12T18:20:00Z', lat: 46.0,  lon:  10.0, duration: 68,  pathWidthKm: 180 },
-      { time: '2026-08-12T18:28:00Z', lat: 37.0,  lon:  12.0, duration: 48,  pathWidthKm: 130 },
+      // Before greatest eclipse — path enters from Russia, sweeps west through Arctic
+      { time: '2026-08-12T16:40:00Z', lat: 73.5,  lon:  62.0, duration:  20, pathWidthKm: 100 },
+      { time: '2026-08-12T16:55:00Z', lat: 74.0,  lon:  35.0, duration:  55, pathWidthKm: 200 },
+      { time: '2026-08-12T17:10:00Z', lat: 72.5,  lon:  10.0, duration:  82, pathWidthKm: 265 },
+      { time: '2026-08-12T17:25:00Z', lat: 70.0,  lon: -10.0, duration: 112, pathWidthKm: 305 },
+      { time: '2026-08-12T17:35:00Z', lat: 67.5,  lon: -11.5, duration: 128, pathWidthKm: 320 },
+      // Greatest eclipse
+      { time: '2026-08-12T17:47:06Z', lat: 65.9,  lon:  -9.7, duration: 138, pathWidthKm: 326 },
+      // After greatest eclipse — shadow moves SSE through Atlantic toward Spain
+      { time: '2026-08-12T18:00:00Z', lat: 61.5,  lon:  -8.5, duration: 120, pathWidthKm: 300 },
+      { time: '2026-08-12T18:10:00Z', lat: 56.5,  lon:  -7.5, duration:  98, pathWidthKm: 270 },
+      { time: '2026-08-12T18:20:00Z', lat: 50.5,  lon:  -6.5, duration:  72, pathWidthKm: 222 },
+      { time: '2026-08-12T18:30:00Z', lat: 44.5,  lon:  -7.0, duration:  45, pathWidthKm: 162 },
+      { time: '2026-08-12T18:38:00Z', lat: 40.0,  lon:  -5.5, duration:  18, pathWidthKm: 100 },
     ],
   },
   // ── 2027 ──────────────────────────────────────────────────────────────────
@@ -232,13 +241,15 @@ export const SOLAR_ECLIPSES: SolarEclipseEntry[] = [
       { time: '2045-08-12T17:30:00Z', lat: 36.5, lon: -109.5, duration: 365, pathWidthKm: 268 },
       { time: '2045-08-12T17:45:00Z', lat: 36.5, lon: -105.0, duration: 378, pathWidthKm: 271 },
       { time: '2045-08-12T18:00:00Z', lat: 35.5, lon: -100.5, duration: 388, pathWidthKm: 273 },
+      // Greatest eclipse over Gulf of Mexico / western Cuba
       { time: '2045-08-12T18:12:00Z', lat: 24.0, lon:  -85.5, duration: 397, pathWidthKm: 275 },
-      { time: '2045-08-12T18:30:00Z', lat: 30.0, lon:  -88.0, duration: 390, pathWidthKm: 274 },
-      { time: '2045-08-12T18:45:00Z', lat: 26.0, lon:  -83.5, duration: 375, pathWidthKm: 271 },
-      { time: '2045-08-12T19:00:00Z', lat: 21.0, lon:  -79.5, duration: 352, pathWidthKm: 266 },
-      { time: '2045-08-12T19:30:00Z', lat: 10.0, lon:  -68.0, duration: 295, pathWidthKm: 253 },
-      { time: '2045-08-12T20:00:00Z', lat:  3.0, lon:  -57.5, duration: 232, pathWidthKm: 234 },
-      { time: '2045-08-12T20:30:00Z', lat: -5.0, lon:  -47.5, duration: 162, pathWidthKm: 208 },
+      // Shadow continues ESE through Caribbean — lat decreases monotonically
+      { time: '2045-08-12T18:25:00Z', lat: 21.0, lon:  -81.5, duration: 382, pathWidthKm: 271 },
+      { time: '2045-08-12T18:40:00Z', lat: 17.5, lon:  -76.5, duration: 360, pathWidthKm: 265 },
+      { time: '2045-08-12T18:55:00Z', lat: 14.0, lon:  -71.0, duration: 330, pathWidthKm: 256 },
+      { time: '2045-08-12T19:15:00Z', lat:  9.5, lon:  -64.5, duration: 290, pathWidthKm: 244 },
+      { time: '2045-08-12T19:40:00Z', lat:  4.5, lon:  -57.0, duration: 242, pathWidthKm: 228 },
+      { time: '2045-08-12T20:05:00Z', lat: -1.0, lon:  -49.5, duration: 185, pathWidthKm: 207 },
     ],
   },
   // ── 2052 ──────────────────────────────────────────────────────────────────
