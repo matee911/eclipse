@@ -46,6 +46,8 @@
       <EclipseMap />
       <EclipseDetails />
     </main>
+
+    <div class="build-badge">{__GIT_HASH__}</div>
   </div>
 {:else}
   <div class="loading">Loading…</div>
@@ -150,5 +152,17 @@
     justify-content: center;
     height: 100vh;
     color: var(--text-secondary);
+  }
+
+  .build-badge {
+    position: fixed;
+    bottom: 0.4rem;
+    right: 0.5rem;
+    font-size: 0.65rem;
+    font-family: monospace;
+    color: var(--text-secondary);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 9999;
   }
 </style>
