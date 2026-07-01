@@ -1,47 +1,71 @@
-# Svelte + TS + Vite
+# Eclipse Viewer
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Interactive SPA for visualizing solar and lunar eclipses from 2026 to 2076.
 
-## Recommended IDE Setup
+**Live demo:** https://matee911.github.io/eclipse/
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Features
 
-## Need an official Svelte framework?
+- **Eclipse map** — Leaflet-powered map with path-of-totality overlays
+- **Local calculations** — contact times, Sun altitude, magnitude for any location
+- **Photography panel** — recommended exposure settings based on eclipse phase and atmospheric conditions
+- **Phase timeline** — visual timeline of P1 → U1 → U2 → maximum → U3 → U4 → P4
+- **Location picker** — click the map or search by coordinates
+- **i18n** — Polish and English UI
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Tech Stack
 
-## Technical considerations
+| Layer | Technology |
+|-------|-----------|
+| UI framework | Svelte 5 (runes) |
+| Build tool | Vite |
+| Language | TypeScript |
+| Maps | Leaflet 1.9 |
+| Localization | i18next |
 
-**Why use this over SvelteKit?**
+## Project Structure
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+```
+src/
+├── lib/
+│   ├── astronomy/
+│   │   ├── julian.ts        # Julian Day conversions
+│   │   ├── sun.ts           # Solar position (Meeus)
+│   │   ├── eclipse.ts       # Contact-time & magnitude calculations
+│   │   ├── camera.ts        # Exposure guide (Espenak)
+│   │   └── atmosphere.ts    # Empirical sky-darkening model
+│   ├── data/
+│   │   └── catalog.ts       # Eclipse catalog (NASA Five Millennium Canon)
+│   └── i18n/                # Translation strings (pl / en)
+├── components/
+│   ├── EclipseList          # Scrollable event list
+│   ├── EclipseMap           # Leaflet map + path overlays
+│   ├── EclipseDetails       # Selected-eclipse info panel
+│   ├── CameraPanel          # Photography exposure panel
+│   ├── PhaseTimeline        # Contact-point timeline
+│   └── LocationPicker       # Coordinate input / map click
+└── stores/                  # Svelte 5 rune-based state
+```
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Algorithms & Data
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+- **Astronomical algorithms** — Jean Meeus, *Astronomical Algorithms* (2nd ed.)
+- **Photography guide** — Fred Espenak, *Photographer's Guide to Solar Eclipses*
+- **Sky darkening** — empirical model based on umbral depth
+- **Eclipse catalog** — NASA Five Millennium Canon of Solar Eclipses (Espenak & Meeus)
+- **Path waypoints** — Xavier Jubier interactive eclipse maps
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+## Getting Started
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+```bash
+npm install
+npm run dev    # development server at http://localhost:5173
+npm run build  # production build → dist/
+```
 
-**Why include `.vscode/extensions.json`?**
+## Tests
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm run test      # unit tests (vitest)
+npm run test:bdd  # end-to-end BDD tests (playwright-bdd)
 ```
