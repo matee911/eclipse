@@ -78,33 +78,42 @@
       const UMBRA_F = 0.5    // umbra half-width = pathWidthKm * 0.5
       const PENUMBRA_F = 3.5 // penumbra half-width = pathWidthKm * 3.5
 
-      // Split each band into N-half and S-half along the central line.
-      // A single ribbon polygon self-intersects at the V-turn near Iceland
-      // (winding cancels to 0 → hole even with nonzero fill rule). Splitting
-      // along the central line avoids any self-intersection (MAT-111).
-      const centralLine = waypoints.map(w => [w.lat, w.lon] as [number, number])
+      // Pre-compute N and S offset rings at each band boundary radius.
+      // Each penumbra band is rendered as two true annular strips: N-side and S-side.
+      // Strip N-b = [...outerN, ...rev(innerN)], strip S-b = [...innerS, ...rev(outerS)].
+      // Neither strip self-intersects at the V-turn, and adjacent strips share boundaries
+      // so there is zero overlap → opacity A per pixel, never 2A (MAT-111).
+      const edgesN = Array.from({ length: BANDS + 1 }, (_, i) => {
+        const f = UMBRA_F + i / BANDS * (PENUMBRA_F - UMBRA_F)
+        return buildOffsetRing(waypoints, (idx) => waypoints[idx].pathWidthKm * f, 'N')
+      })
+      const edgesS = Array.from({ length: BANDS + 1 }, (_, i) => {
+        const f = UMBRA_F + i / BANDS * (PENUMBRA_F - UMBRA_F)
+        return buildOffsetRing(waypoints, (idx) => waypoints[idx].pathWidthKm * f, 'S')
+      })
 
-      for (let b = BANDS - 1; b >= 0; b--) {
+      for (let b = 0; b < BANDS; b++) {
         const t0 = b / BANDS
-        const f = UMBRA_F + (b + 1) / BANDS * (PENUMBRA_F - UMBRA_F)
         const obscuration = 1 - t0
-
-        const northEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'N')
-        const southEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'S')
+        const innerN = edgesN[b]
+        const outerN = edgesN[b + 1]
+        const innerS = edgesS[b]
+        const outerS = edgesS[b + 1]
 
         const { illuminanceFraction } = skyDarkening(obscuration, false)
         const v = Math.round(illuminanceFraction * 80)
         const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
-        const fillOpacity = obscuration * 0.10 + 0.01
+        const fillOpacity = obscuration * 0.30 + 0.03
 
         const opts = { stroke: false, fillColor, fillOpacity }
-        L.polygon([...northEdge, ...[...centralLine].reverse()] as any, opts).addTo(eclipseLayer!)
-        L.polygon([...centralLine, ...[...southEdge].reverse()] as any, opts).addTo(eclipseLayer!)
+        L.polygon([...outerN, ...[...innerN].reverse()] as any, opts).addTo(eclipseLayer!)
+        L.polygon([...innerS, ...[...outerS].reverse()] as any, opts).addTo(eclipseLayer!)
       }
 
-      // Umbra split the same way — N-half and S-half avoid V-turn self-intersection.
-      const northUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'N')
-      const southUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'S')
+      // Umbra: solid N-half and S-half split along central line — same approach.
+      const centralLine = waypoints.map(w => [w.lat, w.lon] as [number, number])
+      const northUmbra = edgesN[0]
+      const southUmbra = edgesS[0]
       const umbraOpts = { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 }
       L.polygon([...northUmbra, ...[...centralLine].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
       L.polygon([...centralLine, ...[...southUmbra].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
