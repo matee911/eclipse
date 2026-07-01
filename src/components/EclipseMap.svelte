@@ -78,9 +78,12 @@
       const UMBRA_F = 0.5    // umbra half-width = pathWidthKm * 0.5
       const PENUMBRA_F = 3.5 // penumbra half-width = pathWidthKm * 3.5
 
-      // Solid polygons rendered outside-in — no inner-ring holes.
-      // fillRule:'nonzero' fills self-intersecting regions at the concave V-turn
-      // near Iceland instead of punching evenodd checkerboard holes (MAT-111).
+      // Split each band into N-half and S-half along the central line.
+      // A single ribbon polygon self-intersects at the V-turn near Iceland
+      // (winding cancels to 0 → hole even with nonzero fill rule). Splitting
+      // along the central line avoids any self-intersection (MAT-111).
+      const centralLine = waypoints.map(w => [w.lat, w.lon] as [number, number])
+
       for (let b = BANDS - 1; b >= 0; b--) {
         const t0 = b / BANDS
         const f = UMBRA_F + (b + 1) / BANDS * (PENUMBRA_F - UMBRA_F)
@@ -88,28 +91,23 @@
 
         const northEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'N')
         const southEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'S')
-        const ring = [...northEdge, ...[...southEdge].reverse()]
 
         const { illuminanceFraction } = skyDarkening(obscuration, false)
         const v = Math.round(illuminanceFraction * 80)
         const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
         const fillOpacity = obscuration * 0.10 + 0.01
 
-        L.polygon(ring as any, {
-          stroke: false,
-          fillColor,
-          fillOpacity,
-          fillRule: 'nonzero' as any,
-        }).addTo(eclipseLayer!)
+        const opts = { stroke: false, fillColor, fillOpacity }
+        L.polygon([...northEdge, ...[...centralLine].reverse()] as any, opts).addTo(eclipseLayer!)
+        L.polygon([...centralLine, ...[...southEdge].reverse()] as any, opts).addTo(eclipseLayer!)
       }
 
-      // Umbra — fillRule:'nonzero' prevents holes from V-turn self-intersection.
+      // Umbra split the same way — N-half and S-half avoid V-turn self-intersection.
       const northUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'N')
       const southUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'S')
-      L.polygon(
-        [...northUmbra, ...[...southUmbra].reverse()] as any,
-        { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50, fillRule: 'nonzero' as any },
-      ).addTo(eclipseLayer!)
+      const umbraOpts = { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 }
+      L.polygon([...northUmbra, ...[...centralLine].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
+      L.polygon([...centralLine, ...[...southUmbra].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
 
       // Umbra edge guide lines
       L.polyline(northUmbra, { color: '#cc2200', weight: 1, opacity: 0.55, dashArray: '4 3' }).addTo(eclipseLayer!)
