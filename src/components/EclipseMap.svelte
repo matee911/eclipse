@@ -78,47 +78,37 @@
       const UMBRA_F = 0.5    // umbra half-width = pathWidthKm * 0.5
       const PENUMBRA_F = 3.5 // penumbra half-width = pathWidthKm * 3.5
 
-      // Each band is a single annular polygon wrapping BOTH sides of the path
-      // (outer ring + inner ring as a hole). Separate N/S polygons would leave
-      // V-shaped gaps at path turning points (MAT-111).
-      for (let b = 0; b < BANDS; b++) {
+      // Solid polygons rendered outside-in — no inner-ring holes.
+      // fillRule:'nonzero' fills self-intersecting regions at the concave V-turn
+      // near Iceland instead of punching evenodd checkerboard holes (MAT-111).
+      for (let b = BANDS - 1; b >= 0; b--) {
         const t0 = b / BANDS
-        const t1 = (b + 1) / BANDS
-        const f0 = UMBRA_F + t0 * (PENUMBRA_F - UMBRA_F)
-        const f1 = UMBRA_F + t1 * (PENUMBRA_F - UMBRA_F)
+        const f = UMBRA_F + (b + 1) / BANDS * (PENUMBRA_F - UMBRA_F)
         const obscuration = 1 - t0
 
-        const offset = (f: number, side: 'N' | 'S') =>
-          buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, side)
-
-        const outerN = offset(f1, 'N')
-        const outerS = offset(f1, 'S')
-        const innerN = offset(f0, 'N')
-        const innerS = offset(f0, 'S')
-
-        // Outer ring: N edge forward + S edge backward — traces the outer boundary
-        const outerRing = [...outerN, ...[...outerS].reverse()]
-        // Inner ring (hole): N edge forward + S edge backward at inner radius
-        const innerRing = [...innerN, ...[...innerS].reverse()]
+        const northEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'N')
+        const southEdge = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, 'S')
+        const ring = [...northEdge, ...[...southEdge].reverse()]
 
         const { illuminanceFraction } = skyDarkening(obscuration, false)
         const v = Math.round(illuminanceFraction * 80)
         const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
-        const fillOpacity = obscuration * 0.30 + 0.03
+        const fillOpacity = obscuration * 0.10 + 0.01
 
-        L.polygon([outerRing, innerRing] as any, {
+        L.polygon(ring as any, {
           stroke: false,
           fillColor,
           fillOpacity,
+          fillRule: 'nonzero' as any,
         }).addTo(eclipseLayer!)
       }
 
-      // Umbra fill polygon — solid dark band showing where totality occurs
+      // Umbra — fillRule:'nonzero' prevents holes from V-turn self-intersection.
       const northUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'N')
       const southUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'S')
       L.polygon(
         [...northUmbra, ...[...southUmbra].reverse()] as any,
-        { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 },
+        { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50, fillRule: 'nonzero' as any },
       ).addTo(eclipseLayer!)
 
       // Umbra edge guide lines
