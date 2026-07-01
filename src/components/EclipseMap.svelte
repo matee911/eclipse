@@ -6,6 +6,7 @@
   import { t } from '../lib/i18n/index.js'
   import type { SolarEclipseEntry } from '../lib/data/types.js'
   import { skyDarkening } from '../lib/astronomy/atmosphere.js'
+  import { perpendicularOffset, waypointBearing } from '../lib/astronomy/pathGeometry.js'
 
   let mapEl: HTMLDivElement
   let map: LMap | null = null
@@ -87,8 +88,10 @@
           // Obscuration at the inner edge of this band (closer = more covered)
           const obscuration = 1 - t0
 
-          const edge0 = waypoints.map(w => approxOffset(w.lat, w.lon, w.pathWidthKm * f0, dir))
-          const edge1 = waypoints.map(w => approxOffset(w.lat, w.lon, w.pathWidthKm * f1, dir))
+          const edge0 = waypoints.map((w, i) =>
+            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f0, dir))
+          const edge1 = waypoints.map((w, i) =>
+            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f1, dir))
 
           // Polygon: go along inner edge, return along outer edge reversed
           const coords: [number, number][] =
@@ -111,8 +114,10 @@
       }
 
       // Umbra fill polygon — solid dark band showing where totality occurs
-      const northUmbra = waypoints.map(w => approxOffset(w.lat, w.lon, w.pathWidthKm / 2, 'N'))
-      const southUmbra = waypoints.map(w => approxOffset(w.lat, w.lon, w.pathWidthKm / 2, 'S'))
+      const northUmbra = waypoints.map((w, i) =>
+        perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm / 2, 'N'))
+      const southUmbra = waypoints.map((w, i) =>
+        perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm / 2, 'S'))
       L.polygon(
         [...northUmbra, ...[...southUmbra].reverse()] as any,
         { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 },
@@ -161,14 +166,6 @@
     return `rgb(${r},${g},0)`
   }
 
-  /**
-   * Approximate a point offset N/S by distKm from (lat, lon).
-   * Simple: 1° latitude ≈ 111 km.
-   */
-  function approxOffset(lat: number, lon: number, distKm: number, dir: 'N' | 'S'): [number, number] {
-    const dLat = distKm / 111
-    return [lat + (dir === 'N' ? dLat : -dLat), lon]
-  }
 </script>
 
 <div class="map-container">
