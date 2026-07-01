@@ -182,9 +182,10 @@ describe('buildOffsetRing — sharp V-turn (2026 eclipse regression)', () => {
     expect(ring.length).toBeGreaterThan(vPath.length)
   })
 
-  it('S ring has more points than waypoints (arc inserted at sharp bend)', () => {
+  it('S ring has exactly waypoints.length points (miter on concave side, no arc)', () => {
+    // The vPath turn is a LEFT turn → S side is concave → single miter point, no arc.
     const ring = buildOffsetRing(vPath, () => 200, 'S')
-    expect(ring.length).toBeGreaterThan(vPath.length)
+    expect(ring.length).toBe(vPath.length)
   })
 
   it('arc points at the turning waypoint are all north of 65°N', () => {

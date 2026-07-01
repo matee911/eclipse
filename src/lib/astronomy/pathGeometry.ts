@@ -125,17 +125,29 @@ export function buildOffsetRing(
     // Positive = clockwise, negative = counterclockwise.
     const diff = ((outPerpBrg - inPerpBrg + 540) % 360) - 180
 
-    if (Math.abs(diff) < 15) {
-      // Shallow bend: a single averaged point is sufficient
-      ring.push(perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), dist, side))
-    } else {
-      // Sharp bend: sweep an arc from inPerpBrg to outPerpBrg pivoting at this
-      // waypoint. This fills the "gap" that would otherwise cause self-intersection.
+    // Detect which side is convex (outside of the bend).
+    // sin(outBrg - inBrg) < 0 → left turn → N side is convex.
+    // sin(outBrg - inBrg) > 0 → right turn → S side is convex.
+    const turnSign = Math.sin((outBrg - inBrg) * DEG)
+    const isConvex = side === 'N' ? turnSign < 0 : turnSign > 0
+
+    if (isConvex && Math.abs(diff) >= 15) {
+      // Convex side with a sharp bend: sweep an arc from inPerpBrg to outPerpBrg
+      // pivoting at this waypoint. This fills the corner gap that would otherwise
+      // cause the polygon boundary to cut back across the path (self-intersection).
       const steps = Math.min(8, Math.max(2, Math.round(Math.abs(diff) / 20)))
       for (let s = 0; s <= steps; s++) {
         const arcBrg = (inPerpBrg + diff * s / steps + 360) % 360
         ring.push(gcDestination(w.lat, w.lon, arcBrg, dist))
       }
+    } else {
+      // Concave side or shallow bend: a single miter point at the circular average
+      // of the incoming and outgoing perpendicular bearings. An arc here would fan
+      // outward into the interior of the curve, creating visible spike artifacts.
+      const sinAvg = (Math.sin(inPerpBrg * DEG) + Math.sin(outPerpBrg * DEG)) / 2
+      const cosAvg = (Math.cos(inPerpBrg * DEG) + Math.cos(outPerpBrg * DEG)) / 2
+      const avgBrg = (Math.atan2(sinAvg, cosAvg) * RAD + 360) % 360
+      ring.push(gcDestination(w.lat, w.lon, avgBrg, dist))
     }
   }
 
