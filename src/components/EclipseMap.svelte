@@ -78,39 +78,40 @@
       const UMBRA_F = 0.5    // umbra half-width = pathWidthKm * 0.5
       const PENUMBRA_F = 3.5 // penumbra half-width = pathWidthKm * 3.5
 
-      for (const dir of ['N', 'S'] as const) {
-        for (let b = 0; b < BANDS; b++) {
-          const t0 = b / BANDS         // 0 = at umbra edge, 1 = at penumbra edge
-          const t1 = (b + 1) / BANDS
-          const f0 = UMBRA_F + t0 * (PENUMBRA_F - UMBRA_F)
-          const f1 = UMBRA_F + t1 * (PENUMBRA_F - UMBRA_F)
+      // Each band is a single annular polygon wrapping BOTH sides of the path
+      // (outer ring + inner ring as a hole). Separate N/S polygons would leave
+      // V-shaped gaps at path turning points (MAT-111).
+      for (let b = 0; b < BANDS; b++) {
+        const t0 = b / BANDS
+        const t1 = (b + 1) / BANDS
+        const f0 = UMBRA_F + t0 * (PENUMBRA_F - UMBRA_F)
+        const f1 = UMBRA_F + t1 * (PENUMBRA_F - UMBRA_F)
+        const obscuration = 1 - t0
 
-          // Obscuration at the inner edge of this band (closer = more covered)
-          const obscuration = 1 - t0
+        const offset = (f: number, side: 'N' | 'S') =>
+          waypoints.map((w, i) =>
+            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f, side))
 
-          const edge0 = waypoints.map((w, i) =>
-            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f0, dir))
-          const edge1 = waypoints.map((w, i) =>
-            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f1, dir))
+        const outerN = offset(f1, 'N')
+        const outerS = offset(f1, 'S')
+        const innerN = offset(f0, 'N')
+        const innerS = offset(f0, 'S')
 
-          // Polygon: go along inner edge, return along outer edge reversed
-          const coords: [number, number][] =
-            dir === 'N'
-              ? [...edge0, ...[...edge1].reverse()]
-              : [...edge1, ...[...edge0].reverse()]
+        // Outer ring: N edge forward + S edge backward — traces the outer boundary
+        const outerRing = [...outerN, ...[...outerS].reverse()]
+        // Inner ring (hole): N edge forward + S edge backward at inner radius
+        const innerRing = [...innerN, ...[...innerS].reverse()]
 
-          const { illuminanceFraction } = skyDarkening(obscuration, false)
-          // Color from bluish-gray (bright, many lux) to deep indigo (dim, few lux)
-          const v = Math.round(illuminanceFraction * 80)
-          const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
-          const fillOpacity = obscuration * 0.30 + 0.03
+        const { illuminanceFraction } = skyDarkening(obscuration, false)
+        const v = Math.round(illuminanceFraction * 80)
+        const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
+        const fillOpacity = obscuration * 0.30 + 0.03
 
-          L.polygon(coords as any, {
-            stroke: false,
-            fillColor,
-            fillOpacity,
-          }).addTo(eclipseLayer!)
-        }
+        L.polygon([outerRing, innerRing] as any, {
+          stroke: false,
+          fillColor,
+          fillOpacity,
+        }).addTo(eclipseLayer!)
       }
 
       // Umbra fill polygon — solid dark band showing where totality occurs
