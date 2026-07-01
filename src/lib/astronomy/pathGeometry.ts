@@ -71,3 +71,73 @@ export function perpendicularOffset(
   const perpS = (perpN + 180) % 360
   return gcDestination(lat, lon, side === 'N' ? perpN : perpS, distKm)
 }
+
+/**
+ * Perpendicular bearing for a given path bearing and side.
+ */
+function perpSideBearing(pathBearingDeg: number, side: 'N' | 'S'): number {
+  const perp1 = (pathBearingDeg - 90 + 360) % 360
+  const perpN = Math.cos(perp1 * DEG) >= 0 ? perp1 : (pathBearingDeg + 90) % 360
+  return side === 'N' ? perpN : (perpN + 180) % 360
+}
+
+/**
+ * Build an offset ring for one side of a path polyline, inserting arc points at
+ * bends where the perpendicular direction changes significantly. This prevents
+ * self-intersecting polygons on sharply curving eclipse paths (e.g. the 2026
+ * arctic eclipse near Iceland where the path turns from SW to SE).
+ *
+ * Without arc joins the ring edge at a sharp bend jumps across the central line,
+ * causing the evenodd fill rule to punch checkerboard holes in the polygon.
+ *
+ * @param distFn - returns the offset distance in km for waypoint index i
+ */
+export function buildOffsetRing(
+  waypoints: ReadonlyArray<{ lat: number; lon: number }>,
+  distFn: (i: number) => number,
+  side: 'N' | 'S',
+): [number, number][] {
+  const n = waypoints.length
+  const ring: [number, number][] = []
+
+  for (let i = 0; i < n; i++) {
+    const w = waypoints[i]
+    const dist = distFn(i)
+
+    if (i === 0) {
+      const brg = gcBearing(w.lat, w.lon, waypoints[1].lat, waypoints[1].lon)
+      ring.push(gcDestination(w.lat, w.lon, perpSideBearing(brg, side), dist))
+      continue
+    }
+
+    if (i === n - 1) {
+      const brg = gcBearing(waypoints[n - 2].lat, waypoints[n - 2].lon, w.lat, w.lon)
+      ring.push(gcDestination(w.lat, w.lon, perpSideBearing(brg, side), dist))
+      continue
+    }
+
+    const inBrg = gcBearing(waypoints[i - 1].lat, waypoints[i - 1].lon, w.lat, w.lon)
+    const outBrg = gcBearing(w.lat, w.lon, waypoints[i + 1].lat, waypoints[i + 1].lon)
+    const inPerpBrg = perpSideBearing(inBrg, side)
+    const outPerpBrg = perpSideBearing(outBrg, side)
+
+    // Signed angular difference from incoming to outgoing perpendicular direction.
+    // Positive = clockwise, negative = counterclockwise.
+    const diff = ((outPerpBrg - inPerpBrg + 540) % 360) - 180
+
+    if (Math.abs(diff) < 15) {
+      // Shallow bend: a single averaged point is sufficient
+      ring.push(perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), dist, side))
+    } else {
+      // Sharp bend: sweep an arc from inPerpBrg to outPerpBrg pivoting at this
+      // waypoint. This fills the "gap" that would otherwise cause self-intersection.
+      const steps = Math.min(8, Math.max(2, Math.round(Math.abs(diff) / 20)))
+      for (let s = 0; s <= steps; s++) {
+        const arcBrg = (inPerpBrg + diff * s / steps + 360) % 360
+        ring.push(gcDestination(w.lat, w.lon, arcBrg, dist))
+      }
+    }
+  }
+
+  return ring
+}

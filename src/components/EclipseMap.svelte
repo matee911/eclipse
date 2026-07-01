@@ -6,7 +6,7 @@
   import { t } from '../lib/i18n/index.js'
   import type { SolarEclipseEntry } from '../lib/data/types.js'
   import { skyDarkening } from '../lib/astronomy/atmosphere.js'
-  import { perpendicularOffset, waypointBearing } from '../lib/astronomy/pathGeometry.js'
+  import { buildOffsetRing } from '../lib/astronomy/pathGeometry.js'
 
   let mapEl: HTMLDivElement
   let map: LMap | null = null
@@ -89,8 +89,7 @@
         const obscuration = 1 - t0
 
         const offset = (f: number, side: 'N' | 'S') =>
-          waypoints.map((w, i) =>
-            perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm * f, side))
+          buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm * f, side)
 
         const outerN = offset(f1, 'N')
         const outerS = offset(f1, 'S')
@@ -115,10 +114,8 @@
       }
 
       // Umbra fill polygon — solid dark band showing where totality occurs
-      const northUmbra = waypoints.map((w, i) =>
-        perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm / 2, 'N'))
-      const southUmbra = waypoints.map((w, i) =>
-        perpendicularOffset(w.lat, w.lon, waypointBearing(waypoints, i), w.pathWidthKm / 2, 'S'))
+      const northUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'N')
+      const southUmbra = buildOffsetRing(waypoints, (i) => waypoints[i].pathWidthKm / 2, 'S')
       L.polygon(
         [...northUmbra, ...[...southUmbra].reverse()] as any,
         { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 },
