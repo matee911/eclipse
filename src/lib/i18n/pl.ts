@@ -31,6 +31,11 @@ export default {
     penumbraLimit: 'Granica półcienia',
     greatestEclipse: 'Największe zaćmienie',
     clickToSelect: 'Kliknij lokalizację, aby zobaczyć szczegóły',
+    lunarVisibilityZone: 'Nocna półkula (strefa widoczności)',
+    lunarSublunarPoint: 'Punkt pod-księżycowy w maksimum',
+  },
+  lunar: {
+    visibilityNote: 'Zaćmienia księżycowe są widoczne z całej nocnej półkuli jednocześnie — około 50% powierzchni Ziemi.',
   },
   location: {
     title: 'Lokalizacja obserwatora',
@@ -51,6 +56,12 @@ export default {
     totalityDuration: 'Czas trwania całkowitości',
     sunAltitude: 'Wys. Słońca w maks.',
     sunAzimuth: 'Azymut Słońca w maks.',
+    tooltips: {
+      maxObscuration: 'Procent tarczy Słońca zasłoniętej przez Księżyc w maksimum zaćmienia',
+      totalityDuration: 'Jak długo trwa faza totalna w tej lokalizacji',
+      sunAltitude: 'Kąt nad horyzontem w momencie największego zaćmienia',
+      sunAzimuth: 'Kierunek na Słońce (0°=N, 90°=E, 180°=S, 270°=W)',
+    },
     contacts: 'Czasy kontaktów (UTC)',
     c1: 'C1 — Początek fazy częściowej',
     c2: 'C2 — Początek całkowitości',
@@ -63,6 +74,10 @@ export default {
     darkening: 'Zaciemnienie nieba',
     lux: 'Szacowane natężenie (lux)',
     stars: 'Widoczność gwiazd',
+    tooltips: {
+      lux: 'Przybliżone natężenie oświetlenia (pełne słońce ≈ 50 000 lux)',
+      stars: 'Czy gwiazdy są wystarczająco jasne, by zobaczyć je gołym okiem',
+    },
     yes: 'Tak',
     no: 'Nie',
   },

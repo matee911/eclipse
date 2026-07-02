@@ -55,6 +55,9 @@
       <p>Type: {t(`eclipseType.${selected.type}`)}</p>
       <p>Saros: {selected.saros}</p>
       <p>Magnitude: {selected.magnitude.toFixed(3)}</p>
+      <div class="lunar-visibility-note">
+        🌍 {t('lunar.visibilityNote')}
+      </div>
       <div class="contact-list">
         <h4>{t('circumstances.contacts')}</h4>
         {#each Object.entries(selected.contacts) as [k, v]}
@@ -89,21 +92,33 @@
 
         <dl class="stat-grid">
           <div class="stat">
-            <dt>{t('circumstances.maxObscuration')}</dt>
+            <dt>
+              {t('circumstances.maxObscuration')}
+              <span class="tooltip-icon" data-tooltip={t('circumstances.tooltips.maxObscuration')} aria-label={t('circumstances.tooltips.maxObscuration')}>?</span>
+            </dt>
             <dd data-testid="obscuration">{fmtPercent(circ.maxObscuration)}</dd>
           </div>
           {#if circ.totalityDuration > 0}
             <div class="stat">
-              <dt>{t('circumstances.totalityDuration')}</dt>
+              <dt>
+                {t('circumstances.totalityDuration')}
+                <span class="tooltip-icon" data-tooltip={t('circumstances.tooltips.totalityDuration')} aria-label={t('circumstances.tooltips.totalityDuration')}>?</span>
+              </dt>
               <dd data-testid="duration">{fmtDuration(circ.totalityDuration)}</dd>
             </div>
           {/if}
           <div class="stat">
-            <dt>{t('circumstances.sunAltitude')}</dt>
+            <dt>
+              {t('circumstances.sunAltitude')}
+              <span class="tooltip-icon" data-tooltip={t('circumstances.tooltips.sunAltitude')} aria-label={t('circumstances.tooltips.sunAltitude')}>?</span>
+            </dt>
             <dd data-testid="sun-altitude">{circ.sunAltitudeAtMax.toFixed(1)}{t('units.degrees')}</dd>
           </div>
           <div class="stat">
-            <dt>{t('circumstances.sunAzimuth')}</dt>
+            <dt>
+              {t('circumstances.sunAzimuth')}
+              <span class="tooltip-icon" data-tooltip={t('circumstances.tooltips.sunAzimuth')} aria-label={t('circumstances.tooltips.sunAzimuth')}>?</span>
+            </dt>
             <dd>{circ.sunAzimuthAtMax.toFixed(1)}{t('units.degrees')}</dd>
           </div>
         </dl>
@@ -122,11 +137,17 @@
             <p class="sky-desc">{s.description}</p>
             <dl class="sky-stats">
               <div class="sky-stat">
-                <dt>{t('sky.lux')}</dt>
+                <dt>
+                  {t('sky.lux')}
+                  <span class="tooltip-icon" data-tooltip={t('sky.tooltips.lux')} aria-label={t('sky.tooltips.lux')}>?</span>
+                </dt>
                 <dd>~{toLux(s.illuminanceFraction).toLocaleString()}</dd>
               </div>
               <div class="sky-stat">
-                <dt>{t('sky.stars')}</dt>
+                <dt>
+                  {t('sky.stars')}
+                  <span class="tooltip-icon" data-tooltip={t('sky.tooltips.stars')} aria-label={t('sky.tooltips.stars')}>?</span>
+                </dt>
                 <dd>{s.starsVisible ? t('sky.yes') : t('sky.no')}</dd>
               </div>
             </dl>
@@ -285,6 +306,17 @@
   }
 
   .lunar-info h3 { margin: 0 0 0.5rem; }
+
+  .lunar-visibility-note {
+    background: var(--surface-raised);
+    border-left: 3px solid #4a90e2;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    margin: 0.5rem 0 0.75rem;
+    line-height: 1.4;
+  }
 
   .contact-list { margin-top: 0.75rem; }
   .contact-list h4 { font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 0.4rem; }

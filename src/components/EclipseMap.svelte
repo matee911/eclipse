@@ -4,7 +4,7 @@
   import { eclipseStore } from '../stores/eclipse.svelte.js'
   import { locationStore } from '../stores/location.svelte.js'
   import { t } from '../lib/i18n/index.js'
-  import type { SolarEclipseEntry } from '../lib/data/types.js'
+  import type { SolarEclipseEntry, LunarEclipseEntry } from '../lib/data/types.js'
   import { skyDarkening } from '../lib/astronomy/atmosphere.js'
   import { buildOffsetRing } from '../lib/astronomy/pathGeometry.js'
   import { penumbraRadiusKm, buildPenumbraCircle } from '../lib/astronomy/partialEclipsePenumbra.js'
@@ -43,9 +43,13 @@
     const sel = eclipseStore.selected
     if (!eclipseLayer) return
     eclipseLayer.clearLayers()
-    if (!sel || sel._kind !== 'solar') return
+    if (!sel) return
 
-    drawSolarPath(sel as SolarEclipseEntry & { _kind: 'solar' })
+    if (sel._kind === 'solar') {
+      drawSolarPath(sel as SolarEclipseEntry & { _kind: 'solar' })
+    } else {
+      drawLunarVisibility(sel as LunarEclipseEntry & { _kind: 'lunar' })
+    }
   })
 
   // Draw observer marker when location changes
@@ -183,6 +187,37 @@
         `${t('map.greatestEclipse')}<br>${eclipse.durationAtGreatest}s`,
         { permanent: false },
       )
+      .addTo(eclipseLayer!)
+  }
+
+  async function drawLunarVisibility(eclipse: LunarEclipseEntry) {
+    if (!eclipseLayer) return
+    const L = await import('leaflet')
+
+    const { lat, lon } = eclipse.greatest
+
+    // Night hemisphere visibility zone: circle of 90° radius (~10 008 km) centred on the sub-lunar point.
+    // Everything inside is above the horizon when the Moon is directly overhead somewhere in this circle.
+    L.circle([lat, lon], {
+      radius: 10_007_543, // 90° of arc on Earth surface in metres
+      color: '#4a90e2',
+      weight: 2,
+      opacity: 0.7,
+      fillColor: '#4a90e2',
+      fillOpacity: 0.10,
+    })
+      .bindTooltip(t('map.lunarVisibilityZone'), { permanent: false })
+      .addTo(eclipseLayer!)
+
+    // Sub-lunar point marker
+    L.circleMarker([lat, lon], {
+      radius: 7,
+      color: '#4a90e2',
+      fillColor: '#fff',
+      fillOpacity: 1,
+      weight: 2,
+    })
+      .bindTooltip(t('map.lunarSublunarPoint'), { permanent: false })
       .addTo(eclipseLayer!)
   }
 

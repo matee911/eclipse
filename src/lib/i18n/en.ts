@@ -31,6 +31,11 @@ export default {
     penumbraLimit: 'Penumbral limit',
     greatestEclipse: 'Greatest eclipse',
     clickToSelect: 'Click a location to see local circumstances',
+    lunarVisibilityZone: 'Night hemisphere (visibility zone)',
+    lunarSublunarPoint: 'Sub-lunar point at maximum',
+  },
+  lunar: {
+    visibilityNote: 'Lunar eclipses are visible from the entire night hemisphere simultaneously — roughly 50% of Earth\'s surface.',
   },
   location: {
     title: 'Observer Location',
@@ -51,6 +56,12 @@ export default {
     totalityDuration: 'Totality duration',
     sunAltitude: 'Sun altitude at max',
     sunAzimuth: 'Sun azimuth at max',
+    tooltips: {
+      maxObscuration: "Percentage of the Sun's disk covered by the Moon at maximum eclipse",
+      totalityDuration: 'Duration of the total phase at this location',
+      sunAltitude: "Sun's angle above the horizon at maximum eclipse",
+      sunAzimuth: 'Direction to the Sun (0°=N, 90°=E, 180°=S, 270°=W)',
+    },
     contacts: 'Contact times (UTC)',
     c1: 'C1 — Partial begins',
     c2: 'C2 — Totality begins',
@@ -63,6 +74,10 @@ export default {
     darkening: 'Sky darkening',
     lux: 'Estimated lux',
     stars: 'Stars visible',
+    tooltips: {
+      lux: 'Approximate illuminance (full sun ≈ 50,000 lux)',
+      stars: 'Whether stars are bright enough to see with the naked eye',
+    },
     yes: 'Yes',
     no: 'No',
   },
