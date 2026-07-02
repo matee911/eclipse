@@ -337,4 +337,54 @@
     color: var(--text-secondary);
     margin-top: 0.75rem;
   }
+
+  .tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    color: var(--surface);
+    font-size: 0.6rem;
+    font-weight: 700;
+    cursor: default;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 3px;
+    opacity: 0.7;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .tooltip-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #f0f0f0;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.4;
+    padding: 0.4rem 0.6rem;
+    border-radius: 5px;
+    white-space: normal;
+    width: 180px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .tooltip-icon:hover {
+    opacity: 1;
+  }
+
+  .tooltip-icon:hover::after {
+    opacity: 1;
+  }
 </style>

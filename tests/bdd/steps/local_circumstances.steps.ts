@@ -82,3 +82,14 @@ Then('I see {string} or {string} status', async ({ page }, s1: string, s2: strin
   const text = (await badge.textContent()) ?? ''
   expect(text.includes(s1) || text.includes(s2)).toBe(true)
 })
+
+Then('I see tooltip icons for obscuration and sun altitude', async ({ page }) => {
+  const statGrid = page.locator('.stat-grid')
+  const tooltipIcons = statGrid.locator('.tooltip-icon')
+  const count = await tooltipIcons.count()
+  expect(count).toBeGreaterThanOrEqual(2)
+  for (let i = 0; i < count; i++) {
+    const tooltip = await tooltipIcons.nth(i).getAttribute('data-tooltip')
+    expect(tooltip).toBeTruthy()
+  }
+})

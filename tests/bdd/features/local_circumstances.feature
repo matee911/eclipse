@@ -36,3 +36,8 @@ Feature: Local eclipse circumstances
     Given I select the "2027-08-02" solar eclipse
     And I choose the location "Sydney" at 33.87°S 151.21°E
     Then I see "Not visible" or "Outside eclipse zone" status
+
+  Scenario: Parameter tooltips are shown for key statistics
+    Given I select the "2027-08-02" solar eclipse
+    And I choose the location "Luxor" at 25.69°N 32.64°E
+    Then I see tooltip icons for obscuration and sun altitude
