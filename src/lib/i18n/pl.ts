@@ -33,6 +33,7 @@ export default {
     clickToSelect: 'Kliknij lokalizację, aby zobaczyć szczegóły',
     lunarVisibilityZone: 'Nocna półkula (strefa widoczności)',
     lunarSublunarPoint: 'Punkt pod-księżycowy w maksimum',
+    pathDataPending: 'Dane o ścieżce nie są jeszcze dostępne dla tego zaćmienia',
   },
   lunar: {
     visibilityNote: 'Zaćmienia księżycowe są widoczne z całej nocnej półkuli jednocześnie — około 50% powierzchni Ziemi.',

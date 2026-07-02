@@ -33,6 +33,7 @@ export default {
     clickToSelect: 'Click a location to see local circumstances',
     lunarVisibilityZone: 'Night hemisphere (visibility zone)',
     lunarSublunarPoint: 'Sub-lunar point at maximum',
+    pathDataPending: 'Path data not yet available for this eclipse',
   },
   lunar: {
     visibilityNote: 'Lunar eclipses are visible from the entire night hemisphere simultaneously — roughly 50% of Earth\'s surface.',
