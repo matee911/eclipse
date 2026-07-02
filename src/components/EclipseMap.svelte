@@ -7,6 +7,7 @@
   import type { SolarEclipseEntry } from '../lib/data/types.js'
   import { skyDarkening } from '../lib/astronomy/atmosphere.js'
   import { buildOffsetRing } from '../lib/astronomy/pathGeometry.js'
+  import { penumbraRadiusKm, buildPenumbraCircle } from '../lib/astronomy/partialEclipsePenumbra.js'
 
   let mapEl: HTMLDivElement
   let map: LMap | null = null
@@ -132,6 +133,40 @@
           [[w0.lat, w0.lon] as [number, number], [w1.lat, w1.lon] as [number, number]],
           { color: durationColor(norm), weight: 4, opacity: 0.95, interactive: false },
         ).addTo(eclipseLayer!)
+      }
+    }
+
+    // Partial eclipse: draw penumbra zone around greatest eclipse point
+    if (eclipse.type === 'P') {
+      const BANDS = 8
+      const POINTS = 64
+      const totalRadius = penumbraRadiusKm(eclipse.gamma)
+
+      if (totalRadius > 0) {
+        for (let b = 0; b < BANDS; b++) {
+          const innerRadius = (b / BANDS) * totalRadius
+          const outerRadius = ((b + 1) / BANDS) * totalRadius
+          // Obscuration at the mid-point of this band (linear falloff from centre)
+          const midFrac = (b + 0.5) / BANDS
+          const obscuration = eclipse.magnitude * (1 - midFrac)
+
+          const outerCircle = buildPenumbraCircle(eclipse.greatest.lat, eclipse.greatest.lon, outerRadius, POINTS)
+
+          const { illuminanceFraction } = skyDarkening(obscuration, false)
+          const v = Math.round(illuminanceFraction * 80)
+          const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
+          const fillOpacity = obscuration * 0.30 + 0.03
+
+          const opts = { stroke: false, fillColor, fillOpacity }
+          if (b === 0) {
+            // Innermost band: solid disk
+            L.polygon(outerCircle as any, opts).addTo(eclipseLayer!)
+          } else {
+            const innerCircle = buildPenumbraCircle(eclipse.greatest.lat, eclipse.greatest.lon, innerRadius, POINTS)
+            // Donut: outer ring with inner hole
+            L.polygon([outerCircle, innerCircle] as any, opts).addTo(eclipseLayer!)
+          }
+        }
       }
     }
 
