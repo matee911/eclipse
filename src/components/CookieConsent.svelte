@@ -61,6 +61,7 @@
   function applyConsent(state: ConsentState) {
     writeCookie(state)
     updateGtag(state)
+    cookieConsentStore.setAdStorage(state.marketing)
     visible = false
     customize = false
     cookieConsentStore.closeSettings()
@@ -82,6 +83,7 @@
     const saved = readCookie()
     if (saved !== null) {
       updateGtag(saved)
+      cookieConsentStore.setAdStorage(saved.marketing)
     } else {
       visible = true
     }

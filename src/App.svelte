@@ -10,6 +10,7 @@
   import LocationPicker from './components/LocationPicker.svelte'
   import CookieConsent from './components/CookieConsent.svelte'
   import CookiesPage from './components/CookiesPage.svelte'
+  import AdUnit from './components/AdUnit.svelte'
   import { trackPageView } from './lib/analytics.js'
 
   let ready = $state(false)
@@ -66,9 +67,13 @@
         <div class="left-panel">
           <EclipseList />
           <LocationPicker />
+          <AdUnit adSlot="1234567890" />
         </div>
         <EclipseMap />
-        <EclipseDetails />
+        <div class="right-panel">
+          <EclipseDetails />
+          <AdUnit adSlot="0987654321" format="rectangle" />
+        </div>
       </main>
 
       <footer class="footer">
@@ -175,6 +180,12 @@
     width: 300px;
     min-width: 260px;
     border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
 
