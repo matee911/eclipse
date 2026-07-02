@@ -23,6 +23,8 @@
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@testing-library/svelte": "^5.4.2",
     "@tsconfig/svelte": "^5.0.8",
+    "@turf/boolean-valid": "^7.3.5",
+    "@turf/kinks": "^7.3.5",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^24.13.2",
     "@vitest/coverage-v8": "^4.1.9",
@@ -38,10 +40,16 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
+    "@turf/buffer": "^7.3.5",
+    "@turf/difference": "^7.3.5",
+    "@turf/helpers": "^7.3.5",
+    "@turf/union": "^7.3.5",
     "i18next": "^26.3.3",
     "leaflet": "^1.9.4"
   },
   "lint-staged": {
-    "src/**/*.{ts,svelte}": ["vitest run --reporter=verbose"]
+    "src/**/*.{ts,svelte}": [
+      "vitest run --reporter=verbose"
+    ]
   }
 }

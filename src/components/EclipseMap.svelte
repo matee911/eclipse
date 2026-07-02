@@ -6,8 +6,9 @@
   import { t } from '../lib/i18n/index.js'
   import type { SolarEclipseEntry, LunarEclipseEntry } from '../lib/data/types.js'
   import { skyDarkening } from '../lib/astronomy/atmosphere.js'
-  import { buildOffsetRing } from '../lib/astronomy/pathGeometry.js'
+  import { buildPenumbraBands, type BandGeometry } from '../lib/astronomy/penumbraBands.js'
   import { penumbraRadiusKm, buildPenumbraCircle } from '../lib/astronomy/partialEclipsePenumbra.js'
+  import type { Feature, Polygon } from 'geojson'
 
   let mapEl: HTMLDivElement
   let map: LMap | null = null
@@ -79,53 +80,32 @@
     if (waypoints.length >= 2) {
       // Penumbra gradient bands: from umbra edge outward to penumbra limit.
       // Each band represents a slice of obscuration, shaded by lux level.
+      // Band polygons are built with turf buffer/union/difference (penumbraBands.ts),
+      // which always yields simple (non-self-intersecting) polygons regardless of
+      // path curvature or buffer width — hand-rolled perpendicular offsetting could
+      // self-intersect along curved stretches, producing spike artifacts (MAT-111).
       const BANDS = 8
       const UMBRA_F = 0.5    // umbra half-width = pathWidthKm * 0.5
       const PENUMBRA_F = 3.5 // penumbra half-width = pathWidthKm * 3.5
 
-      // Pre-compute N and S offset rings at each band boundary radius.
-      // Each penumbra band is rendered as two true annular strips: N-side and S-side.
-      // Strip N-b = [...outerN, ...rev(innerN)], strip S-b = [...innerS, ...rev(outerS)].
-      // Neither strip self-intersects at the V-turn, and adjacent strips share boundaries
-      // so there is zero overlap → opacity A per pixel, never 2A (MAT-111).
-      const edgesN = Array.from({ length: BANDS + 1 }, (_, i) => {
-        const f = UMBRA_F + i / BANDS * (PENUMBRA_F - UMBRA_F)
-        return buildOffsetRing(waypoints, (idx) => waypoints[idx].pathWidthKm * f, 'N')
-      })
-      const edgesS = Array.from({ length: BANDS + 1 }, (_, i) => {
-        const f = UMBRA_F + i / BANDS * (PENUMBRA_F - UMBRA_F)
-        return buildOffsetRing(waypoints, (idx) => waypoints[idx].pathWidthKm * f, 'S')
-      })
+      const { bands, umbra } = buildPenumbraBands(waypoints, BANDS, UMBRA_F, PENUMBRA_F)
 
       for (let b = 0; b < BANDS; b++) {
-        const t0 = b / BANDS
-        const obscuration = 1 - t0
-        const innerN = edgesN[b]
-        const outerN = edgesN[b + 1]
-        const innerS = edgesS[b]
-        const outerS = edgesS[b + 1]
-
+        const obscuration = 1 - b / BANDS
         const { illuminanceFraction } = skyDarkening(obscuration, false)
         const v = Math.round(illuminanceFraction * 80)
         const fillColor = `rgb(${v + 10}, ${v + 20}, ${v + 80})`
         const fillOpacity = obscuration * 0.30 + 0.03
-
-        const opts = { stroke: false, fillColor, fillOpacity }
-        L.polygon([...outerN, ...[...innerN].reverse()] as any, opts).addTo(eclipseLayer!)
-        L.polygon([...innerS, ...[...outerS].reverse()] as any, opts).addTo(eclipseLayer!)
+        drawBandGeometry(L, eclipseLayer!, bands[b], { stroke: false, fillColor, fillOpacity })
       }
 
-      // Umbra: solid N-half and S-half split along central line — same approach.
-      const centralLine = waypoints.map(w => [w.lat, w.lon] as [number, number])
-      const northUmbra = edgesN[0]
-      const southUmbra = edgesS[0]
-      const umbraOpts = { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 }
-      L.polygon([...northUmbra, ...[...centralLine].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
-      L.polygon([...centralLine, ...[...southUmbra].reverse()] as any, umbraOpts).addTo(eclipseLayer!)
+      drawBandGeometry(L, eclipseLayer!, umbra, { stroke: false, fillColor: '#7b0000', fillOpacity: 0.50 })
 
-      // Umbra edge guide lines
-      L.polyline(northUmbra, { color: '#cc2200', weight: 1, opacity: 0.55, dashArray: '4 3' }).addTo(eclipseLayer!)
-      L.polyline(southUmbra, { color: '#cc2200', weight: 1, opacity: 0.55, dashArray: '4 3' }).addTo(eclipseLayer!)
+      // Umbra edge guide line (outer boundary of the umbra polygon)
+      for (const poly of umbra.polygons) {
+        const outerRing = poly.geometry.coordinates[0].map(([lon, lat]) => [lat, lon] as [number, number])
+        L.polyline(outerRing, { color: '#cc2200', weight: 1, opacity: 0.55, dashArray: '4 3' }).addTo(eclipseLayer!)
+      }
 
       // Central line segments colored by totality duration (yellow → dark red)
       const maxDuration = Math.max(...waypoints.map(w => w.duration))
@@ -138,6 +118,18 @@
           { color: durationColor(norm), weight: 4, opacity: 0.95, interactive: false },
         ).addTo(eclipseLayer!)
       }
+    }
+
+    // No path data for central eclipse — show a note near the greatest eclipse point
+    if (waypoints.length < 2 && eclipse.type !== 'P') {
+      const g = eclipse.greatest
+      const noteIcon = L.divIcon({
+        className: '',
+        html: `<div style="background:rgba(0,0,0,0.7);color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;border-left:3px solid #e67e22;">⚠ ${t('map.pathDataPending')}</div>`,
+        iconSize: [240, 28],
+        iconAnchor: [120, -12],
+      })
+      L.marker([g.lat, g.lon], { icon: noteIcon, interactive: false }).addTo(eclipseLayer!)
     }
 
     // Partial eclipse: draw penumbra zone around greatest eclipse point
@@ -219,6 +211,20 @@
     })
       .bindTooltip(t('map.lunarSublunarPoint'), { permanent: false })
       .addTo(eclipseLayer!)
+  }
+
+  /**
+   * Converts a turf Polygon feature ([lon, lat] rings, outer + holes) into
+   * Leaflet's expected ring format ([lat, lon] per ring, outer first).
+   */
+  function featureToLeafletRings(feature: Feature<Polygon>): [number, number][][] {
+    return feature.geometry.coordinates.map(ring => ring.map(([lon, lat]) => [lat, lon] as [number, number]))
+  }
+
+  function drawBandGeometry(L: typeof import('leaflet'), layer: LayerGroup, geom: BandGeometry, opts: Record<string, unknown>) {
+    for (const poly of geom.polygons) {
+      L.polygon(featureToLeafletRings(poly) as any, opts).addTo(layer)
+    }
   }
 
   /**

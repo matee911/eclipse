@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest'
 import {
   gcBearing,
   gcDestination,
+  gcDistance,
   waypointBearing,
   perpendicularOffset,
   buildOffsetRing,
@@ -63,6 +64,22 @@ describe('gcDestination', () => {
     const [lat, lon] = gcDestination(45, 20, 135, 0)
     expect(lat).toBeCloseTo(45, 5)
     expect(lon).toBeCloseTo(20, 5)
+  })
+})
+
+describe('gcDistance', () => {
+  it('1° of latitude is ~111 km', () => {
+    expect(gcDistance(0, 0, 1, 0)).toBeCloseTo(111.2, 0)
+  })
+
+  it('same point is 0 km', () => {
+    expect(gcDistance(45, 20, 45, 20)).toBeCloseTo(0, 5)
+  })
+
+  it('is symmetric', () => {
+    const d1 = gcDistance(65, -25, 60, -27.5)
+    const d2 = gcDistance(60, -27.5, 65, -25)
+    expect(d1).toBeCloseTo(d2, 6)
   })
 })
 

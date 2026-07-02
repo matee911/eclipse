@@ -29,6 +29,18 @@ export function gcDestination(lat: number, lon: number, bearingDeg: number, dist
 }
 
 /**
+ * Great-circle distance between two points, in km.
+ */
+export function gcDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const φ1 = lat1 * DEG
+  const φ2 = lat2 * DEG
+  const Δφ = (lat2 - lat1) * DEG
+  const Δλ = (lon2 - lon1) * DEG
+  const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2
+  return 2 * R_KM * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+/**
  * Path bearing at waypoint i, averaged from the incoming and outgoing segments.
  * Uses vector-sum averaging to handle the circular nature of bearings.
  */
