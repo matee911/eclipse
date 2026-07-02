@@ -2,16 +2,29 @@
   import { onMount } from 'svelte'
   import { initI18n, changeLocale, t, type Locale, SUPPORTED_LOCALES } from './lib/i18n/index.js'
   import { localeStore } from './stores/locale.svelte.js'
+  import { eclipseStore } from './stores/eclipse.svelte.js'
   import EclipseList from './components/EclipseList.svelte'
   import EclipseMap from './components/EclipseMap.svelte'
   import EclipseDetails from './components/EclipseDetails.svelte'
   import LocationPicker from './components/LocationPicker.svelte'
+  import { trackPageView } from './lib/analytics.js'
 
   let ready = $state(false)
 
   onMount(async () => {
     await initI18n('en')
     ready = true
+    trackPageView('/list', 'Eclipse List')
+  })
+
+  $effect(() => {
+    const selected = eclipseStore.selected
+    if (!ready) return
+    if (selected) {
+      trackPageView(`/eclipse/${selected.date}`, `Eclipse ${selected.date}`)
+    } else {
+      trackPageView('/list', 'Eclipse List')
+    }
   })
 
   async function switchLocale(lng: Locale) {

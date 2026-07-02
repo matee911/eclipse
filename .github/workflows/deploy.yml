@@ -30,6 +30,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE_URL: /eclipse/
+          VITE_GA4_ID: ${{ secrets.VITE_GA4_ID }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
