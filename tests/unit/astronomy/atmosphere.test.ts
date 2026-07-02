@@ -58,12 +58,48 @@ describe('skyDarkening', () => {
 })
 
 describe('toLux', () => {
-  it('full illuminance = 100 000 lux', () => {
-    expect(toLux(1.0)).toBe(100_000)
+  // MAT-145: realistic midday reference should be ~50 000 lux, not 100 000.
+  // Direct sunlight can theoretically reach 100k but typical European/real-world
+  // measurements are 20–60k lux. 50k is a calibrated midday reference that
+  // matches user-measured values at typical eclipse observation conditions.
+  it('full illuminance = 50 000 lux (realistic midday reference, MAT-145)', () => {
+    expect(toLux(1.0)).toBe(50_000)
   })
 
   it('totality illuminance is very low', () => {
     expect(toLux(0.0001)).toBeLessThan(20)
+  })
+})
+
+describe('sky bar visualization contract', () => {
+  // The sky bar must represent DARKENING (obscuration effect), not illuminance.
+  // A wider bar = deeper eclipse — the user's natural intuition.
+  // Bar fraction = 1 − illuminanceFraction.
+
+  it('bar fraction is near 0 when no eclipse (illuminance ≈ 1)', () => {
+    const { illuminanceFraction } = skyDarkening(0, false)
+    const barFraction = 1 - illuminanceFraction
+    expect(barFraction).toBeLessThan(0.01)
+  })
+
+  it('bar fraction is near 1 during totality (illuminance ≈ 0)', () => {
+    const { illuminanceFraction } = skyDarkening(1.0, true)
+    const barFraction = 1 - illuminanceFraction
+    expect(barFraction).toBeGreaterThan(0.99)
+  })
+
+  it('bar fraction increases monotonically with obscuration', () => {
+    const barFractions = [0, 0.25, 0.5, 0.75, 0.9, 0.99].map(
+      f => 1 - skyDarkening(f, false).illuminanceFraction
+    )
+    for (let i = 1; i < barFractions.length; i++) {
+      expect(barFractions[i]).toBeGreaterThan(barFractions[i - 1])
+    }
+  })
+
+  it('bar fraction at 90% obscuration exceeds 0.85 (deep darkening clearly visible)', () => {
+    const { illuminanceFraction } = skyDarkening(0.9, false)
+    expect(1 - illuminanceFraction).toBeGreaterThan(0.85)
   })
 })
 

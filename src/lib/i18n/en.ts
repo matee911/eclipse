@@ -60,7 +60,7 @@ export default {
   },
   sky: {
     title: 'Sky Conditions',
-    illuminance: 'Relative illuminance',
+    darkening: 'Sky darkening',
     lux: 'Estimated lux',
     stars: 'Stars visible',
     yes: 'Yes',

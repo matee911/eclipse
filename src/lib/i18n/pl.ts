@@ -60,7 +60,7 @@ export default {
   },
   sky: {
     title: 'Warunki nieba',
-    illuminance: 'Względne oświetlenie',
+    darkening: 'Zaciemnienie nieba',
     lux: 'Szacowane natężenie (lux)',
     stars: 'Widoczność gwiazd',
     yes: 'Tak',

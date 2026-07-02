@@ -23,9 +23,13 @@ export const SOLAR_ECLIPSES: SolarEclipseEntry[] = [
     // GE coords: Wikipedia — 65°12′N 25°12′W, just west of Iceland (Látrabjarg)
     durationAtGreatest: 138,
     greatest: { time: '2026-08-12T17:47:06Z', lat: 65.2, lon: -25.2, sunAlt: 26 },
+    // MAT-146: ordered by viewing quality, not shadow chronology.
+    // Greatest eclipse (138s) is W of Iceland; Spain is the main land target.
+    // Russia/Arctic start the path over uninhabited ice with very low sun (<20°).
+    // Faroe Islands (~62°N, 7°W) lie east of the central line — deep partial only.
     regions: [
-      'Russia (Siberia)', 'Arctic Ocean', 'Greenland', 'Iceland', 'Faroe Islands',
-      'Spain (A Coruña, Bilbao, Zaragoza, Valencia, Palma)',
+      'Iceland', 'Spain (A Coruña, Bilbao, Zaragoza, Valencia, Palma)',
+      'Greenland', 'Faroe Islands (deep partial)', 'Russia (Siberia)', 'Arctic Ocean',
     ],
     centralLine: [
       // Pre-GE: path enters from Russia, sweeps west then SW through Arctic

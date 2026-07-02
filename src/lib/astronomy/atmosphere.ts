@@ -59,9 +59,12 @@ export function skyDarkening(obscuration: number, isTotality: boolean): SkyCondi
   return { illuminanceFraction, description, starsVisible }
 }
 
-/** Convert illuminance fraction to approximate lux (midday full sun ≈ 100 000 lux). */
+/** Convert illuminance fraction to approximate lux.
+ * Reference: ~50 000 lux for typical midday direct sunlight in European/mid-latitude
+ * conditions. Peak tropical zenith sun can reach 100k, but 50k better matches
+ * real-world lux-meter readings most users experience (MAT-145). */
 export function toLux(illuminanceFraction: number): number {
-  return Math.round(illuminanceFraction * 100_000)
+  return Math.round(illuminanceFraction * 50_000)
 }
 
 /** Magnitude change in stellar magnitudes (Δm = −2.5·log₁₀(I/I₀)). */

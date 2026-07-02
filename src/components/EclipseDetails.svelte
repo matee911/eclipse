@@ -112,8 +112,12 @@
         {#if s}
           <div class="sky-block">
             <h4>{t('sky.title')}</h4>
+            <div class="sky-bar-label">
+              <span>{t('sky.darkening')}</span>
+              <span>{((1 - s.illuminanceFraction) * 100).toFixed(0)}%</span>
+            </div>
             <div class="sky-bar-wrap">
-              <div class="sky-bar" style:width="{(s.illuminanceFraction * 100).toFixed(1)}%"></div>
+              <div class="sky-bar" style:width="{((1 - s.illuminanceFraction) * 100).toFixed(1)}%"></div>
             </div>
             <p class="sky-desc">{s.description}</p>
             <dl class="sky-stats">
@@ -235,6 +239,14 @@
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
+  }
+
+  .sky-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
   }
 
   .sky-bar-wrap {
