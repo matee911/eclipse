@@ -3,23 +3,31 @@
   import { initI18n, changeLocale, t, type Locale, SUPPORTED_LOCALES } from './lib/i18n/index.js'
   import { localeStore } from './stores/locale.svelte.js'
   import { eclipseStore } from './stores/eclipse.svelte.js'
+  import { cookieConsentStore } from './stores/cookieConsent.svelte.js'
   import EclipseList from './components/EclipseList.svelte'
   import EclipseMap from './components/EclipseMap.svelte'
   import EclipseDetails from './components/EclipseDetails.svelte'
   import LocationPicker from './components/LocationPicker.svelte'
+  import CookieConsent from './components/CookieConsent.svelte'
+  import CookiesPage from './components/CookiesPage.svelte'
   import { trackPageView } from './lib/analytics.js'
 
   let ready = $state(false)
+  let route = $state(window.location.hash === '#cookies' ? 'cookies' : 'app')
 
   onMount(async () => {
     await initI18n('en')
     ready = true
-    trackPageView('/list', 'Eclipse List')
+    if (route === 'app') trackPageView('/list', 'Eclipse List')
+
+    window.addEventListener('hashchange', () => {
+      route = window.location.hash === '#cookies' ? 'cookies' : 'app'
+    })
   })
 
   $effect(() => {
     const selected = eclipseStore.selected
-    if (!ready) return
+    if (!ready || route !== 'app') return
     if (selected) {
       trackPageView(`/eclipse/${selected.date}`, `Eclipse ${selected.date}`)
     } else {
@@ -34,34 +42,45 @@
 </script>
 
 {#if ready}
-  <div class="app" data-testid="app">
-    <nav class="topbar">
-      <span class="app-title" data-testid="app-title">{t('app.title')}</span>
-      <span class="subtitle">{t('app.subtitle')}</span>
-      <div class="lang-switcher">
-        {#each SUPPORTED_LOCALES as lng}
-          <button
-            class:active={localeStore.current === lng}
-            onclick={() => switchLocale(lng)}
-            data-testid={`lang-${lng}`}
-          >
-            {t(`language.${lng}`)}
-          </button>
-        {/each}
-      </div>
-    </nav>
+  {#if route === 'cookies'}
+    <CookiesPage />
+  {:else}
+    <div class="app" data-testid="app">
+      <nav class="topbar">
+        <span class="app-title" data-testid="app-title">{t('app.title')}</span>
+        <span class="subtitle">{t('app.subtitle')}</span>
+        <div class="lang-switcher">
+          {#each SUPPORTED_LOCALES as lng}
+            <button
+              class:active={localeStore.current === lng}
+              onclick={() => switchLocale(lng)}
+              data-testid={`lang-${lng}`}
+            >
+              {t(`language.${lng}`)}
+            </button>
+          {/each}
+        </div>
+      </nav>
 
-    <main class="layout">
-      <div class="left-panel">
-        <EclipseList />
-        <LocationPicker />
-      </div>
-      <EclipseMap />
-      <EclipseDetails />
-    </main>
+      <main class="layout">
+        <div class="left-panel">
+          <EclipseList />
+          <LocationPicker />
+        </div>
+        <EclipseMap />
+        <EclipseDetails />
+      </main>
 
-    <div class="build-badge">{__GIT_HASH__}</div>
-  </div>
+      <footer class="footer">
+        <a href="#cookies">{t('cookies.page.title')}</a>
+        <button onclick={() => cookieConsentStore.openSettings()}>{t('cookies.footer.changeSettings')}</button>
+      </footer>
+
+      <div class="build-badge">{__GIT_HASH__}</div>
+    </div>
+  {/if}
+
+  <CookieConsent />
 {:else}
   <div class="loading">Loading…</div>
 {/if}
@@ -165,6 +184,41 @@
     justify-content: center;
     height: 100vh;
     color: var(--text-secondary);
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.35rem 1.25rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    font-size: 0.75rem;
+  }
+
+  .footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+
+  .footer button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  .footer button:hover {
+    color: var(--text-primary);
   }
 
   .build-badge {

@@ -88,4 +88,56 @@ export default {
     en: 'English',
     pl: 'Polski',
   },
+  cookies: {
+    banner: {
+      title: 'Ustawienia cookies',
+      description:
+        'Używamy plików cookie do analizy ruchu i wyświetlania reklam. Możesz zaakceptować wszystkie, odrzucić lub dostosować ustawienia.',
+      necessary: 'Niezbędne pliki cookie',
+      necessaryDesc: 'Wymagane do działania serwisu. Nie można ich wyłączyć.',
+      analytics: 'Pliki cookie analityczne',
+      analyticsDesc: 'Pomagają nam zrozumieć, jak odwiedzający korzystają z serwisu (Google Analytics).',
+      marketing: 'Pliki cookie marketingowe',
+      marketingDesc: 'Używane do wyświetlania trafnych reklam (Google Ads).',
+      acceptAll: 'Akceptuj wszystkie',
+      rejectAll: 'Odrzuć wszystkie',
+      customize: 'Dostosuj',
+      save: 'Zapisz ustawienia',
+      policyLink: 'Polityka cookies',
+    },
+    page: {
+      title: 'Polityka Cookies',
+      updated: 'Ostatnia aktualizacja: lipiec 2026',
+      back: '← Wróć do aplikacji',
+      whatAreCookies: 'Czym są pliki cookie?',
+      whatAreCookiesText:
+        'Pliki cookie to małe pliki tekstowe zapisywane na Twoim urządzeniu przez przeglądarkę. Pomagają serwisowi zapamiętać Twoje preferencje i analizować sposób korzystania z niego.',
+      typesTitle: 'Rodzaje używanych plików cookie',
+      necessary: 'Niezbędne',
+      necessaryText:
+        'Te pliki cookie są niezbędne do prawidłowego działania serwisu i nie można ich wyłączyć.',
+      analytics: 'Analityczne',
+      analyticsText:
+        'Analityczne pliki cookie pomagają nam zrozumieć, jak odwiedzający korzystają z Eclipse Viewer. Wszystkie dane są zagregowane i anonimowe.',
+      marketing: 'Marketingowe',
+      marketingText:
+        'Marketingowe pliki cookie służą do dostarczania trafnych reklam przez Google Ads. Wymagają Twojej wyraźnej zgody.',
+      consentMode: 'Google Consent Mode v2',
+      consentModeText:
+        'Używamy Google Consent Mode v2. Skrypty analityczne i reklamowe ładują się zawsze, ale dane osobowe są zbierane dopiero po wyrażeniu zgody.',
+      manageTitle: 'Zarządzaj preferencjami',
+      manageText: 'Możesz zmienić ustawienia plików cookie w dowolnym momencie.',
+      name: 'Nazwa cookie',
+      purpose: 'Cel',
+      duration: 'Czas trwania',
+      days: 'dni',
+      years: 'lata',
+      ccCookiePurpose: 'Przechowuje Twoje preferencje dotyczące zgody na cookies',
+      gaPurpose: 'Google Analytics — identyfikuje unikatowych użytkowników',
+      gaSessionPurpose: 'Google Analytics — śledzenie sesji',
+    },
+    footer: {
+      changeSettings: 'Ustawienia cookies',
+    },
+  },
 }

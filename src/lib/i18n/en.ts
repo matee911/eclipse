@@ -88,4 +88,56 @@ export default {
     en: 'English',
     pl: 'Polski',
   },
+  cookies: {
+    banner: {
+      title: 'Cookie settings',
+      description:
+        'We use cookies to analyze traffic and show relevant ads. You can accept all, reject all, or customize your preferences.',
+      necessary: 'Necessary cookies',
+      necessaryDesc: 'Required for the site to function. Cannot be disabled.',
+      analytics: 'Analytics cookies',
+      analyticsDesc: 'Help us understand how visitors use the site (Google Analytics).',
+      marketing: 'Marketing cookies',
+      marketingDesc: 'Used to show relevant ads (Google Ads).',
+      acceptAll: 'Accept all',
+      rejectAll: 'Reject all',
+      customize: 'Customize',
+      save: 'Save preferences',
+      policyLink: 'Cookie policy',
+    },
+    page: {
+      title: 'Cookie Policy',
+      updated: 'Last updated: July 2026',
+      back: '← Back to app',
+      whatAreCookies: 'What are cookies?',
+      whatAreCookiesText:
+        'Cookies are small text files stored on your device by your browser. They help the site remember your preferences and analyze how you use it.',
+      typesTitle: 'Types of cookies we use',
+      necessary: 'Necessary',
+      necessaryText:
+        'These cookies are essential for the site to work correctly and cannot be disabled.',
+      analytics: 'Analytics',
+      analyticsText:
+        'Analytics cookies help us understand how visitors interact with Eclipse Viewer. All data is aggregated and anonymized.',
+      marketing: 'Marketing',
+      marketingText:
+        'Marketing cookies are used to deliver relevant advertisements via Google Ads. They require your explicit consent.',
+      consentMode: 'Google Consent Mode v2',
+      consentModeText:
+        'We use Google Consent Mode v2. Analytics and advertising scripts are loaded in all cases, but personal data is only collected after you give consent.',
+      manageTitle: 'Manage your preferences',
+      manageText: 'You can change your cookie preferences at any time.',
+      name: 'Cookie name',
+      purpose: 'Purpose',
+      duration: 'Duration',
+      days: 'days',
+      years: 'years',
+      ccCookiePurpose: 'Stores your cookie consent preferences',
+      gaPurpose: 'Google Analytics — identifies unique visitors',
+      gaSessionPurpose: 'Google Analytics — session tracking',
+    },
+    footer: {
+      changeSettings: 'Cookie settings',
+    },
+  },
 }
